@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.5/phpunit.xsd"
+         bootstrap="tests/bootstrap.php"
+         colors="true"
+         failOnWarning="true"
+         failOnRisky="true">
+    <testsuites>
+        <testsuite name="Pure">
+            <directory>tests</directory>
+        </testsuite>
+    </testsuites>
+    <source>
+        <include>
+            <directory>src</directory>
+        </include>
+        <exclude>
+            <directory>src/Admin</directory>
+            <file>src/Plugin.php</file>
+            <file>src/Cli.php</file>
+            <file>src/Installer.php</file>
+            <file>src/Options.php</file>
+            <file>src/Redirector.php</file>
+            <file>src/Regenerator.php</file>
+            <file>src/Repository.php</file>
+            <file>src/SlugHooks.php</file>
+        </exclude>
+    </source>
+</phpunit>

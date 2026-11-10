@@ -1,0 +1,47 @@
+<?xml version="1.0"?>
+<ruleset name="Bangla Slug">
+    <description>Coding standards for the Bangla Slug plugin.</description>
+
+    <file>.</file>
+    <exclude-pattern>*/vendor/*</exclude-pattern>
+    <exclude-pattern>*/node_modules/*</exclude-pattern>
+    <exclude-pattern>*/tests/*</exclude-pattern>
+
+    <arg name="extensions" value="php"/>
+    <arg name="colors"/>
+    <arg value="sp"/>
+
+    <config name="testVersion" value="8.1-"/>
+    <config name="minimum_wp_version" value="6.0"/>
+
+    <rule ref="WordPress-Extra"/>
+    <rule ref="WordPress-Docs"/>
+    <rule ref="WordPress.WP.I18n">
+        <properties>
+            <property name="text_domain" type="array">
+                <element value="bangla-slug"/>
+            </property>
+        </properties>
+    </rule>
+    <rule ref="WordPress.NamingConventions.PrefixAllGlobals">
+        <properties>
+            <property name="prefixes" type="array">
+                <element value="bangla_slug"/>
+                <element value="BANGLA_SLUG"/>
+                <element value="SaizulAmin\BanglaSlug"/>
+            </property>
+        </properties>
+    </rule>
+
+    <!-- The code base uses PSR-4 class files, short array syntax and camelCase methods. -->
+    <rule ref="WordPress.Files.FileName.InvalidClassFileName"><severity>0</severity></rule>
+    <rule ref="WordPress.Files.FileName.NotHyphenatedLowercase"><severity>0</severity></rule>
+    <rule ref="WordPress.NamingConventions.ValidFunctionName.MethodNameInvalid"><severity>0</severity></rule>
+    <rule ref="WordPress.NamingConventions.ValidVariableName.VariableNotSnakeCase"><severity>0</severity></rule>
+    <rule ref="WordPress.NamingConventions.ValidVariableName.PropertyNotSnakeCase"><severity>0</severity></rule>
+    <rule ref="Universal.Arrays.DisallowShortArraySyntax"><severity>0</severity></rule>
+    <rule ref="Universal.Operators.DisallowShortTernary"><severity>0</severity></rule>
+    <rule ref="Generic.Arrays.DisallowShortArraySyntax"><severity>0</severity></rule>
+    <rule ref="Squiz.Commenting.FunctionComment.ParamCommentFullStop"><severity>0</severity></rule>
+    <rule ref="Squiz.Commenting.InlineComment.InvalidEndChar"><severity>0</severity></rule>
+</ruleset>
