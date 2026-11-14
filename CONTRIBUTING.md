@@ -17,7 +17,7 @@ You can also run a downloaded `phpunit.phar` (version 10.5) directly: `php phpun
 
 ## Architecture
 
-- `src/Transliterator.php`, `src/Slugifier.php`, `src/Mapping.php`, `src/Stopwords.php` are pure PHP with no WordPress calls. Keep them that way so they stay unit testable.
+- `src/Transliterator.php`, `src/Slugifier.php`, `src/Mapping.php`, `src/Dictionary.php`, `src/Stopwords.php` are pure PHP with no WordPress calls. Keep them that way so they stay unit testable.
 - Everything else (`Plugin`, `SlugHooks`, `Regenerator`, `Redirector`, `Admin`, `Cli`, `Repository`, `Options`) integrates with WordPress.
 
 ## Reporting a wrong transliteration

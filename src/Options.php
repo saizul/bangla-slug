@@ -22,18 +22,20 @@ final class Options
     public static function defaults(): array
     {
         return [
-            'enabled'          => true,
-            'post_types'       => ['post', 'page', 'product'],
-            'convert_terms'    => true,
-            'taxonomies'       => ['category', 'post_tag', 'product_cat', 'product_tag'],
-            'remove_stopwords' => true,
-            'stopwords_extra'  => '',
-            'schwa'            => Transliterator::SCHWA_FINAL,
-            'max_length'       => 120,
-            'separator'        => '-',
-            'custom_map'       => '',
-            'redirects'        => true,
-            'delete_data'      => false,
+            'enabled'           => true,
+            'post_types'        => ['post', 'page', 'product'],
+            'convert_terms'     => true,
+            'taxonomies'        => ['category', 'post_tag', 'product_cat', 'product_tag'],
+            'remove_stopwords'  => true,
+            'stopwords_extra'   => '',
+            'schwa'             => Transliterator::SCHWA_FINAL,
+            'max_length'        => 120,
+            'separator'         => '-',
+            'custom_map'        => '',
+            'dictionary'        => '',
+            'dictionary_suffix' => Dictionary::SUFFIX_KEEP,
+            'redirects'         => true,
+            'delete_data'       => false,
         ];
     }
 
@@ -83,6 +85,9 @@ final class Options
 
         $out['stopwords_extra'] = sanitize_textarea_field((string) ($input['stopwords_extra'] ?? ''));
         $out['custom_map']      = sanitize_textarea_field((string) ($input['custom_map'] ?? ''));
+        $out['dictionary']      = sanitize_textarea_field((string) ($input['dictionary'] ?? ''));
+
+        $out['dictionary_suffix'] = Dictionary::validMode((string) ($input['dictionary_suffix'] ?? Dictionary::SUFFIX_KEEP));
 
         $schwa = (string) ($input['schwa'] ?? Transliterator::SCHWA_FINAL);
         $out['schwa'] = in_array($schwa, [Transliterator::SCHWA_NONE, Transliterator::SCHWA_FINAL, Transliterator::SCHWA_MEDIAL], true)
@@ -159,7 +164,35 @@ final class Options
                 'max_length'       => (int) $options['max_length'],
                 'remove_stopwords' => (bool) $options['remove_stopwords'],
                 'stopwords'        => array_values(array_map('strval', $stopwords)),
+                'dictionary'       => self::dictionary($options),
             ]
+        );
+    }
+
+    /**
+     * Build the whole-word dictionary for the given (or current) options.
+     *
+     * @param array<string,mixed>|null $options Options, null for the saved ones.
+     */
+    public static function dictionary(?array $options = null): Dictionary
+    {
+        $options ??= self::get();
+
+        /**
+         * Filters the whole-word dictionary.
+         *
+         * Keys are Bangla words or phrases (words separated by spaces), values
+         * are the Latin spelling used in the slug. Entries are matched before
+         * transliteration and take precedence over the character mapping.
+         *
+         * @param array<string,string> $entries Word or phrase => Latin spelling.
+         * @param array<string,mixed>  $options Options.
+         */
+        $entries = (array) apply_filters('bangla_slug_dictionary', Dictionary::parse((string) ($options['dictionary'] ?? '')), $options);
+
+        return new Dictionary(
+            array_map('strval', $entries),
+            (string) ($options['dictionary_suffix'] ?? Dictionary::SUFFIX_KEEP)
         );
     }
 }

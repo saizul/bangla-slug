@@ -138,6 +138,61 @@ final class Cli
     }
 
     /**
+     * Inspect the whole-word dictionary from the settings and filters.
+     *
+     * ## OPTIONS
+     *
+     * <action>
+     * : list, count or lookup.
+     *
+     * [<text>]
+     * : Word or phrase for lookup.
+     *
+     * [--format=<format>]
+     * : table, csv, json. Default: table.
+     *
+     * ## EXAMPLES
+     *
+     *     wp bangla-slug dictionary list
+     *     wp bangla-slug dictionary lookup "কম্পিউটারের"
+     *
+     * @param list<string>         $args       Positional arguments.
+     * @param array<string,string> $assoc_args Associative arguments.
+     */
+    public function dictionary(array $args, array $assoc_args): void
+    {
+        $action     = (string) ($args[0] ?? 'list');
+        $dictionary = Options::dictionary();
+
+        switch ($action) {
+            case 'count':
+                WP_CLI::line((string) $dictionary->count());
+                break;
+            case 'list':
+                $items = [];
+                foreach ($dictionary->entries() as $from => $to) {
+                    $items[] = ['word' => $from, 'latin' => $to];
+                }
+                Utils\format_items((string) ($assoc_args['format'] ?? 'table'), $items, ['word', 'latin']);
+                break;
+            case 'lookup':
+                $text = (string) ($args[1] ?? '');
+                if ($text === '') {
+                    WP_CLI::error('Give a word or phrase to look up.');
+                }
+                $tokens = $dictionary->tokens($text);
+                $hits   = array_filter($tokens, static fn (array $t): bool => $t['fixed']);
+                if ($hits === []) {
+                    WP_CLI::error('No dictionary entry matches.');
+                }
+                WP_CLI::line($dictionary->apply($text));
+                break;
+            default:
+                WP_CLI::error('Unknown action. Use list, count or lookup.');
+        }
+    }
+
+    /**
      * List or clear stored redirects.
      *
      * ## OPTIONS
