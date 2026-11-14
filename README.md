@@ -23,6 +23,7 @@ By [Saizul Amin](https://saizul.com). See [বাংলা বিবরণ](#ব
 - Posts, pages, custom post types (WooCommerce products included) and terms.
 - Stopword removal for Bangla and English, plus your own list.
 - Configurable character and conjunct mapping.
+- Word dictionary for names, brands and loanwords, including phrases and inflected forms.
 - Bulk tool (Tools > Bangla Slug) with dry-run preview, and WP-CLI.
 - Old to new slugs stored in a database table; old URLs 301-redirect to the new permalink.
 - Settings page with live preview.
@@ -49,7 +50,7 @@ This is a readable URL romanisation, not a scholarly scheme. Fix any spelling yo
 
 ## Settings
 
-Settings > Bangla Slug: enable/disable, post types, taxonomies, stopwords, inherent vowel mode, maximum length, separator, custom mapping, redirects, delete-data-on-uninstall, and a live preview that uses the form values before you save.
+Settings > Bangla Slug: enable/disable, post types, taxonomies, stopwords, inherent vowel mode, maximum length, separator, custom mapping, word dictionary, redirects, delete-data-on-uninstall, and a live preview that uses the form values before you save.
 
 Custom mapping uses one `from=to` per line:
 
@@ -59,6 +60,29 @@ Custom mapping uses one `from=to` per line:
 ```
 
 Targets may only contain letters and digits. Keys containing a hasanta are treated as conjuncts.
+
+## Word dictionary
+
+Phonetic rules cannot know that কম্পিউটার should be `computer` (not `kompiutar`) or that a brand has an official spelling. The word dictionary (Settings > Bangla Slug > Word dictionary) gives whole words or phrases a fixed Latin spelling, one `word=latin` per line:
+
+```
+কম্পিউটার=computer
+গুগল=google
+ঢাকা বিশ্ববিদ্যালয়=dhaka university
+```
+
+- Matching is on whole words, ignores punctuation around a word and prefers the longest phrase, so `ঢাকা বিশ্ববিদ্যালয়` wins over a separate `ঢাকা` entry. A comma or other punctuation between words breaks a phrase.
+- Dictionary words are applied before the character mapping and are never removed as stopwords.
+- Values are lowercased; anything other than letters and digits becomes the slug separator, so `dhaka-university` and `dhaka university` are the same.
+- Common case endings on the last word (ের, এর, র, য়ের, য়, কে, তে, ে, রা, দের, টি, টা, গুলো, গুলি ...) are recognised. The *Case endings* setting decides what happens:
+
+| Mode | বাংলাদেশের ইতিহাস |
+| --- | --- |
+| Keep the ending (default) | `bangladesher-itihas` |
+| Drop the ending | `bangladesh-itihas` |
+| Exact words only | `bangladesher-itihas` (from the normal rules, the entry is not used) |
+
+Short entries combined with suffix matching can catch unrelated words (an entry for কম also matches কমের); use *Exact words only* if that is a problem.
 
 ## Bulk conversion
 
@@ -72,6 +96,8 @@ wp bangla-slug regenerate --post_type=post,page --taxonomy=category,post_tag
 wp bangla-slug convert "আমার সোনার বাংলা"
 wp bangla-slug redirects list
 wp bangla-slug redirects clear
+wp bangla-slug dictionary list
+wp bangla-slug dictionary lookup "কম্পিউটারের"
 ```
 
 Options for `regenerate`: `--post_type`, `--taxonomy`, `--status`, `--batch`, `--dry-run`, `--format`.
@@ -89,6 +115,12 @@ When a request would be a 404, the plugin looks at the path segments for an old 
 add_filter( 'bangla_slug_map', function ( array $map ): array {
     $map['ফ'] = 'f';
     return $map;
+} );
+
+// Add dictionary entries in code (word or phrase => Latin spelling).
+add_filter( 'bangla_slug_dictionary', function ( array $entries ): array {
+    $entries['ফেসবুক'] = 'facebook';
+    return $entries;
 } );
 
 // Add stopwords.
@@ -123,7 +155,7 @@ composer php-lint
 composer lint        # PHPCS
 ```
 
-The transliteration lives in `src/Transliterator.php`, `src/Slugifier.php`, `src/Mapping.php` and `src/Stopwords.php` with no WordPress dependency. See [CONTRIBUTING.md](CONTRIBUTING.md).
+The transliteration lives in `src/Transliterator.php`, `src/Slugifier.php`, `src/Mapping.php`, `src/Dictionary.php` and `src/Stopwords.php` with no WordPress dependency. See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## বাংলা বিবরণ
 
@@ -136,6 +168,7 @@ The transliteration lives in `src/Transliterator.php`, `src/Slugifier.php`, `src
 - পোস্ট, পেজ, কাস্টম পোস্ট টাইপ (ওয়াকমার্সের পণ্যসহ) এবং ক্যাটাগরি/ট্যাগের জন্য কাজ করে।
 - অপ্রয়োজনীয় শব্দ (এবং, ও, এর ইত্যাদি) বাদ দেওয়ার সুবিধা এবং নিজের তালিকা যোগ করার সুযোগ।
 - অক্ষরের ম্যাপিং নিজের মতো পরিবর্তন করা যায়।
+- শব্দ অভিধান: নাম, ব্র্যান্ড ও বিদেশি শব্দের নির্দিষ্ট বানান দেওয়া যায় (যেমন কম্পিউটার=computer), "বাংলাদেশের" ধরনের বিভক্তিযুক্ত রূপও চেনে।
 - পুরনো পোস্টের স্লাগ একসাথে পরিবর্তনের জন্য অ্যাডমিন টুল (টুলস > Bangla Slug) এবং WP-CLI কমান্ড।
 - পুরনো লিংক নতুন লিংকে স্বয়ংক্রিয়ভাবে ৩০১ রিডাইরেক্ট হয়।
 - লাইভ প্রিভিউসহ সেটিংস পেজ।

@@ -3,7 +3,7 @@
  * Plugin Name:       Bangla Slug
  * Plugin URI:        https://github.com/saizul/bangla-slug
  * Description:       Converts Bangla post, page and term titles into readable Latin slugs, with a bulk tool, WP-CLI command and automatic 301 redirects for old URLs.
- * Version:           1.0.0
+ * Version:           1.1.0
  * Requires at least: 6.0
  * Requires PHP:      8.1
  * Author:            Saizul Amin
@@ -21,7 +21,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('BANGLA_SLUG_VERSION', '1.0.0');
+define('BANGLA_SLUG_VERSION', '1.1.0');
 define('BANGLA_SLUG_FILE', __FILE__);
 define('BANGLA_SLUG_DIR', plugin_dir_path(__FILE__));
 define('BANGLA_SLUG_URL', plugin_dir_url(__FILE__));

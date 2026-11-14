@@ -4,6 +4,19 @@ All notable changes are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [1.1.0] - 2026-11-14
+
+### Added
+- Word dictionary: fixed Latin spellings for whole words and multi-word phrases (`কম্পিউটার=computer`, `ঢাকা বিশ্ববিদ্যালয়=dhaka university`) for names, brands and loanwords that phonetic rules cannot get right. Matches are applied before transliteration, take precedence over the character mapping, prefer the longest phrase and are never removed as stopwords.
+- Case ending handling for dictionary words (বাংলাদেশের, কম্পিউটারে, কম্পিউটারগুলো ...): keep and transliterate the ending (default), drop it, or match exact words only.
+- Settings field for the dictionary with an entry count, also honoured by the live preview, the bulk tool and WP-CLI.
+- Filter `bangla_slug_dictionary` to add or change entries in code.
+- WP-CLI: `wp bangla-slug dictionary list|count|lookup`.
+- `Dictionary` class and unit tests; it has no WordPress dependency.
+
+### Changed
+- Stopword removal now runs on dictionary-aware tokens. With an empty dictionary slugs are unchanged.
+
 ## [1.0.0] - 2026-11-10
 
 ### Added

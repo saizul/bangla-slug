@@ -26,8 +26,13 @@ final class Slugifier
     /** @var array<string,true> */
     private array $stopwords = [];
 
+    private Dictionary $dictionary;
+
     /**
-     * @param array{separator?:string,max_length?:int,remove_stopwords?:bool,stopwords?:list<string>} $options
+     * Options: separator, max_length, remove_stopwords, stopwords and
+     * dictionary (a Dictionary instance or a word => Latin array).
+     *
+     * @param array{separator?:string,max_length?:int,remove_stopwords?:bool,stopwords?:list<string>,dictionary?:Dictionary|array<string,string>} $options
      */
     public function __construct(Transliterator $transliterator, array $options = [])
     {
@@ -35,6 +40,9 @@ final class Slugifier
         $this->separator       = ($options['separator'] ?? '-') === '_' ? '_' : '-';
         $this->maxLength       = max(10, (int) ($options['max_length'] ?? 120));
         $this->removeStopwords = (bool) ($options['remove_stopwords'] ?? true);
+
+        $dictionary       = $options['dictionary'] ?? [];
+        $this->dictionary = $dictionary instanceof Dictionary ? $dictionary : new Dictionary((array) $dictionary);
 
         $list = $options['stopwords'] ?? array_merge(Stopwords::bangla(), Stopwords::english());
         foreach ($list as $word) {
@@ -54,9 +62,12 @@ final class Slugifier
         $text = html_entity_decode(strip_tags($text), ENT_QUOTES | ENT_HTML5, 'UTF-8');
         $text = Transliterator::normalize($text);
 
+        // Dictionary matches are fixed Latin text and are never stopwords.
+        $tokens = $this->dictionary->tokens($text);
         if ($this->removeStopwords) {
-            $text = $this->withoutStopwords($text);
+            $tokens = $this->withoutStopwords($tokens);
         }
+        $text = implode(' ', array_column($tokens, 'text'));
 
         $latin = mb_strtolower($this->transliterator->transliterate($text));
         $latin = str_replace(["'", "\u{2019}", "\u{2018}"], '', $latin);
@@ -82,24 +93,38 @@ final class Slugifier
     }
 
     /**
-     * Drop stopword tokens, but never all of them.
+     * The dictionary used for whole-word overrides.
      */
-    private function withoutStopwords(string $text): string
+    public function dictionary(): Dictionary
     {
-        $tokens = preg_split('/\s+/u', trim($text), -1, PREG_SPLIT_NO_EMPTY);
-        if ($tokens === false || count($tokens) < 2) {
-            return $text;
+        return $this->dictionary;
+    }
+
+    /**
+     * Drop stopword tokens, but never all of them. Dictionary tokens are kept.
+     *
+     * @param list<array{text:string,fixed:bool}> $tokens
+     * @return list<array{text:string,fixed:bool}>
+     */
+    private function withoutStopwords(array $tokens): array
+    {
+        if (count($tokens) < 2) {
+            return $tokens;
         }
 
         $kept = [];
         foreach ($tokens as $token) {
-            $bare = mb_strtolower((string) preg_replace('/^[\p{P}\p{S}\s]+|[\p{P}\p{S}\s]+$/u', '', $token));
+            if ($token['fixed']) {
+                $kept[] = $token;
+                continue;
+            }
+            $bare = mb_strtolower((string) preg_replace('/^[\p{P}\p{S}\s]+|[\p{P}\p{S}\s]+$/u', '', $token['text']));
             if ($bare === '' || !isset($this->stopwords[$bare])) {
                 $kept[] = $token;
             }
         }
 
-        return $kept === [] ? $text : implode(' ', $kept);
+        return $kept === [] ? $tokens : $kept;
     }
 
     /**

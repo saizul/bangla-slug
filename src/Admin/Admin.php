@@ -192,6 +192,24 @@ final class Admin
                         </td>
                     </tr>
                     <tr>
+                        <th scope="row"><label for="bs-dictionary"><?php echo esc_html__('Word dictionary', 'bangla-slug'); ?></label></th>
+                        <td>
+                            <textarea id="bs-dictionary" name="<?php echo esc_attr($name); ?>[dictionary]" rows="6" cols="50" class="large-text code" lang="bn"><?php echo esc_textarea((string) $o['dictionary']); ?></textarea>
+                            <p class="description"><?php echo esc_html__('Fixed spellings for whole words or phrases, one per line, for example: কম্পিউটার=computer or ঢাকা বিশ্ববিদ্যালয়=dhaka university. Used before the character mapping. Lines starting with # are ignored.', 'bangla-slug'); ?></p>
+                            <p><label for="bs-dictionary-suffix"><?php echo esc_html__('Case endings (বাংলাদেশের, কম্পিউটারে ...):', 'bangla-slug'); ?></label>
+                                <select id="bs-dictionary-suffix" name="<?php echo esc_attr($name); ?>[dictionary_suffix]">
+                                    <option value="keep" <?php selected($o['dictionary_suffix'], 'keep'); ?>><?php echo esc_html__('Match and keep the ending (bangladesher)', 'bangla-slug'); ?></option>
+                                    <option value="drop" <?php selected($o['dictionary_suffix'], 'drop'); ?>><?php echo esc_html__('Match and drop the ending (bangladesh)', 'bangla-slug'); ?></option>
+                                    <option value="off" <?php selected($o['dictionary_suffix'], 'off'); ?>><?php echo esc_html__('Exact words only', 'bangla-slug'); ?></option>
+                                </select></p>
+                            <?php
+                            $dictionary = Options::dictionary($o);
+                            /* translators: %d: number of dictionary entries. */
+                            echo '<p class="description">' . esc_html(sprintf(_n('%d entry in use, including entries added by the bangla_slug_dictionary filter.', '%d entries in use, including entries added by the bangla_slug_dictionary filter.', $dictionary->count(), 'bangla-slug'), $dictionary->count())) . '</p>';
+                            ?>
+                        </td>
+                    </tr>
+                    <tr>
                         <th scope="row"><?php echo esc_html__('Redirects', 'bangla-slug'); ?></th>
                         <td><label><input type="checkbox" name="<?php echo esc_attr($name); ?>[redirects]" value="1" <?php checked(!empty($o['redirects'])); ?>>
                             <?php echo esc_html__('301-redirect old Bangla URLs to the new slug (only when they would be a 404)', 'bangla-slug'); ?></label></td>
